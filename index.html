@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Recovery Forest | Every Tree Is Hope</title>
+
+<style>
+
+*{box-sizing:border-box}
+
+body{margin:0;background:#071c15;color:#fff;font-family:Arial,sans-serif;text-align:center}
+
+header{padding:22px;background:#102e22}
+
+h1{color:#d5b86b;margin:8px}
+
+h2{color:#e4ce91}
+
+p{line-height:1.6}
+
+.hero{padding:35px 18px;background:linear-gradient(#123e2b,#071c15)}
+
+.hero p{max-width:550px;margin:15px auto}
+
+button{background:#d5b86b;color:#14271c;border:0;padding:15px 24px;border-radius:30px;font-weight:bold;font-size:16px;cursor:pointer;margin:8px}
+
+button:hover{background:#f4df9c}
+
+.forest{min-height:330px;background:linear-gradient(#123c30,#235b39 70%,#193a22);padding:25px 10px;border-radius:20px;margin:15px;position:relative}
+
+#trees{display:flex;flex-wrap:wrap;justify-content:center;align-items:end;gap:12px;min-height:220px}
+
+.tree{font-size:46px;animation:grow .6s ease-out}
+
+@keyframes grow{from{transform:scale(0)}to{transform:scale(1)}}
+
+.stat{font-size:38px;font-weight:bold;color:#e4ce91}
+
+section{padding:20px}
+
+input,select,textarea{display:block;width:100%;max-width:400px;margin:12px auto;padding:14px;border-radius:10px;border:1px solid #779b80;font-size:16px}
+
+textarea{min-height:90px}
+
+.form{background:#153629;padding:22px;border-radius:20px;max-width:500px;margin:20px auto}
+
+.message{background:#204b37;border-radius:12px;padding:16px;margin:12px auto;max-width:500px;overflow-wrap:anywhere}
+
+footer{padding:30px;background:#081a14;color:#ddd;font-size:13px}
+
+small{color:#d4e3d8}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>🌳 RECOVERY FOREST</h1>
+
+<p>Every Tree Is a Life. Every Life Matters.</p>
+
+</header>
+
+<div class="hero">
+
+<h2>Welcome to the Worldwide Living Forest</h2>
+
+<p>From addiction to recovery, from darkness to hope. Every tree represents a person, a journey, a life worth celebrating.</p>
+
+<p>You are not alone. Together, we grow.</p>
+
+<button onclick="document.getElementById('plant').scrollIntoView({behavior:'smooth'})">🌱 Plant Your Tree</button>
+
+</div>
+
+<section>
+
+<h2>Our Living Forest</h2>
+
+<div class="stat" id="count">0</div>
+
+<p>Trees of Hope Planted on This Device</p>
+
+<div class="forest">
+
+<div id="trees"></div>
+
+</div>
+
+<small>Every tree represents hope and a new beginning.</small>
+
+</section>
+
+<section id="plant">
+
+<h2>🌱 Plant a Tree of Hope</h2>
+
+<p>Celebrate recovery, honor a loved one, or plant a tree for someone still struggling.</p>
+
+<div class="form">
+
+<input id="name" maxlength="60" placeholder="Your first name or nickname">
+
+<select id="type">
+
+<option value="Recovery">My Recovery Journey</option>
+
+<option value="Support">Supporting Someone in Recovery</option>
+
+<option value="Hope">Hope for Someone Still Struggling</option>
+
+<option value="Memory">In Memory of a Loved One</option>
+
+</select>
+
+<input id="country" maxlength="60" placeholder="Your country">
+
+<textarea id="story" maxlength="500" placeholder="Share your hope or recovery message (optional)"></textarea>
+
+<button onclick="plantTree()">Plant My Tree 🌳</button>
+
+<p id="result" role="status"></p>
+
+</div>
+
+</section>
+
+<section>
+
+<h2>💚 Voices of Hope</h2>
+
+<div id="messages">
+
+<p>Every recovery story begins with hope.</p>
+
+</div>
+
+</section>
+
+<section>
+
+<h2>No One Is Too Far Gone</h2>
+
+<p>One decision. One phone call. One day at a time.</p>
+
+<p>Recovery is possible, and your life matters.</p>
+
+</section>
+
+<footer>
+
+<strong>RECOVERY WARRIORS DOUG</strong>
+
+<p>RECOVER OUT LOUD. HELP OTHERS RISE.</p>
+
+<p>recoverywarriorsdoug@gmail.com</p>
+
+<p>If you need help in the USA, call SAMHSA at 1-800-662-HELP (4357).</p>
+
+<p>© 2026 Recovery Forest</p>
+
+</footer>
+
+<script>
+
+const key="recoveryForestTrees";
+
+let planted=[];
+
+try{
+
+planted=JSON.parse(localStorage.getItem(key))||[];
+
+if(!Array.isArray(planted))planted=[];
+
+}catch(e){planted=[]}
+
+function render(){
+
+document.getElementById("count").textContent=planted.length;
+
+const forest=document.getElementById("trees");
+
+forest.replaceChildren();
+
+planted.forEach(()=>{
+
+const tree=document.createElement("span");
+
+tree.className="tree";
+
+tree.textContent="🌳";
+
+forest.appendChild(tree);
+
+});
+
+const messages=document.getElementById("messages");
+
+messages.replaceChildren();
+
+planted.slice().reverse().forEach(t=>{
+
+const div=document.createElement("div");
+
+div.className="message";
+
+const heading=document.createElement("strong");
+
+heading.textContent=t.name+" • "+t.country;
+
+const body=document.createElement("p");
+
+body.textContent=t.story||"A tree of hope has been planted.";
+
+div.append(heading,body);
+
+messages.appendChild(div);
+
+});
+
+if(!planted.length){
+
+messages.textContent="Be the first to plant a tree of hope.";
+
+}
+
+}
+
+function plantTree(){
+
+const name=document.getElementById("name").value.trim();
+
+const country=document.getElementById("country").value.trim();
+
+const story=document.getElementById("story").value.trim();
+
+const type=document.getElementById("type").value;
+
+const result=document.getElementById("result");
+
+if(!name||!country){
+
+result.textContent="Please enter your name and country.";
+
+return;
+
+}
+
+planted.push({name,country,story,type});
+
+try{
+
+localStorage.setItem(key,JSON.stringify(planted));
+
+result.textContent="🌳 Your tree of hope has been planted!";
+
+render();
+
+document.getElementById("name").value="";
+
+document.getElementById("story").value="";
+
+}catch(e){
+
+planted.pop();
+
+result.textContent="Unable to save your tree on this device.";
+
+}
+
+}
+
+render();
+
+</script>
+
+</body>
+
+</html>
