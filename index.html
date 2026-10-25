@@ -1,25 +1,161 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Recovery Forest 2.0</title>
-
 <style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#e8f3e8;color:#183b27;text-align:center}
+header{background:linear-gradient(135deg,#123b27,#287447);color:white;padding:40px 15px}
+h1{font-size:36px}
+main{max-width:900px;margin:auto;padding:15px}
+.card{background:white;border-radius:15px;padding:25px;margin:20px 0;box-shadow:0 4px 12px #0002}
+input,textarea{width:100%;padding:14px;margin:10px 0;border:1px solid #ccc;border-radius:8px;font-size:16px}
+textarea{min-height:100px}
+button{background:#287447;color:white;border:0;border-radius:8px;padding:15px 25px;font-size:17px;cursor:pointer}
+button:disabled{opacity:.5}
+.forest{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px}
+.tree{background:#f3faf3;border:2px solid #b5d8b5;border-radius:15px;padding:15px;overflow-wrap:anywhere}
+.icon{font-size:60px}
+footer{background:#123b27;color:white;padding:25px}
+footer a{color:#c8f5ce}
+</style>
+</head>
+<body>
+<header>
+<h1>🌳 Recovery Forest 2.0</h1>
+<p>Every Tree Represents a Life Worth Saving</p>
+<h3>Recover Out Loud. Help Others Rise.</h3>
+</header>
+<main>
+<section class="card">
+<h2>❤️ Welcome to Recovery Forest</h2>
+<p>Addiction can make you feel alone. Recovery reminds us that we are not.</p>
+<p>Every tree represents hope, courage, healing, and another chance at life.</p>
+<h3>You Are Not Too Far Gone.</h3>
+</section>
+<section class="card">
+<h2>🌱 Plant Your Recovery Tree</h2>
+<p>Share your name and a message of hope. You may use a nickname.</p>
+<form id="treeForm">
+<input id="treeName" placeholder="Your name or nickname" maxlength="50" required>
+<textarea id="treeMessage" placeholder="Your recovery message..." maxlength="500" required></textarea>
+<button id="plantButton" type="submit">🌳 Plant My Tree</button>
+</form>
+<p id="status"></p>
+</section>
+<section class="card">
+<h2>🌲 The Recovery Forest</h2>
+<p>Every tree has a story. Every story matters.</p>
+<h3 id="treeCount">Loading forest...</h3>
+<div class="forest" id="forest"></div>
+</section>
+<section class="card">
+<h2>❤️ To the Person Still Struggling</h2>
+<p>I know what it feels like to believe there is no way out.</p>
+<p>But your story does not have to end where addiction has taken you.</p>
+<h3>One Call Can Change Everything.</h3>
+<p>You deserve another chance at life.</p>
+</section>
+</main>
+<footer>
+<h3>Recovery Warriors Doug</h3>
+<p>Recover Out Loud. Help Others Rise.</p>
+<a href="mailto:recoverywarriorsdoug@gmail.com">recoverywarriorsdoug@gmail.com</a>
+<p>Recovery support: 1-800-662-HELP (4357)</p>
+</footer>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getFirestore,collection,addDoc,getDocs,query,orderBy,limit,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-body {
+const firebaseConfig={
+apiKey:"YOUR_API_KEY",
+authDomain:"YOUR_PROJECT_ID.firebaseapp.com",
+projectId:"YOUR_PROJECT_ID",
+storageBucket:"YOUR_PROJECT_ID.firebasestorage.app",
+messagingSenderId:"YOUR_SENDER_ID",
+appId:"YOUR_APP_ID"
+};
 
-  margin: 0;
+const forest=document.getElementById("forest");
+const count=document.getElementById("treeCount");
+const status=document.getElementById("status");
+const form=document.getElementById("treeForm");
+const button=document.getElementById("plantButton");
+let db;
 
-  font-family: Arial, sans-serif;
+function showTree(name,message){
+const tree=document.createElement("div");
+tree.className="tree";
+const icon=document.createElement("div");
+icon.className="icon";
+icon.textContent="🌳";
+const heading=document.createElement("h3");
+heading.textContent=name;
+const text=document.createElement("p");
+text.textContent=message;
+tree.append(icon,heading,text);
+forest.appendChild(tree);
+}
 
-  background: #102b20;
+async function loadForest(){
+forest.innerHTML="";
+try{
+const q=query(collection(db,"trees"),orderBy("createdAt","desc"),limit(100));
+const snapshot=await getDocs(q);
+count.textContent=snapshot.size+" Recovery Trees Displayed";
+if(snapshot.empty)forest.textContent="Be the first to plant a tree!";
+snapshot.forEach(doc=>{
+const data=doc.data();
+showTree(data.name||"Recovery Warrior",data.message||"One day at a time.");
+});
+}catch(error){
+console.error(error);
+count.textContent="Unable to load trees.";
+status.textContent="Check Firebase settings and permissions.";
+}
+}
 
-  color: white;
+const ready=firebaseConfig.apiKey!=="YOUR_API_KEY"&&firebaseConfig.projectId!=="YOUR_PROJECT_ID"&&firebaseConfig.appId!=="YOUR_APP_ID";
 
-  text-align: center;
+if(ready){
+try{
+db=getFirestore(initializeApp(firebaseConfig));
+loadForest();
+}catch(error){
+console.error(error);
+count.textContent="Firebase connection error.";
+button.disabled=true;
+}
+}else{
+count.textContent="Firebase connection pending.";
+status.textContent="Firebase configuration needs to be added.";
+button.disabled=true;
+}
+
+form.addEventListener("submit",async event=>{
+event.preventDefault();
+if(!db)return;
+const name=document.getElementById("treeName").value.trim();
+const message=document.getElementById("treeMessage").value.trim();
+if(!name||!message)return;
+button.disabled=true;
+status.textContent="Planting your tree...";
+try{
+await addDoc(collection(db,"trees"),{
+name,message,createdAt:serverTimestamp()
+});
+form.reset();
+status.textContent="🌳 Your recovery tree has been planted!";
+await loadForest();
+}catch(error){
+console.error(error);
+status.textContent="Unable to plant tree. Check database permissions.";
+}finally{
+button.disabled=false;
+}
+});
+</script>
+</body>
+</html>
